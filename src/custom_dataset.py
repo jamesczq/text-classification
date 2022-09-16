@@ -1,30 +1,21 @@
 import numpy as np
-import pandas as pd
-
 import torch
-import transformers
-
-import tqdm
-
-LABELS = {'business':0,
-          'entertainment':1,
-          'sport':2,
-          'tech':3,
-          'politics':4}
 
 class CustomDataset(torch.utils.data.Dataset):
-
-    def __init__(self, tokenizer, df, xcol='text', ycol='category', max_length=128):
-
-        self.labels = [LABELS[label] for label in df[ycol]]
+    def __init__(self, tokenizer, df, text_col, label_col, max_length):
+        """
+        Require that 
+        df[text_col] is of str type
+        df[label_col] is of int type
+        """
+        self.labels = np.array(df[label_col]) # error w/o np.array(*)!!
         self.texts = [
             tokenizer(
                 text, 
                 padding='max_length', 
                 max_length=max_length, 
                 truncation=True, 
-                return_tensors="pt") 
-            for text in df[xcol]]
+                return_tensors="pt") for text in df[text_col]]
 
     def classes(self):
         return self.labels
