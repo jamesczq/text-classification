@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import tqdm
 import transformers
@@ -45,14 +46,14 @@ def train(model, train_dataset, val_dataset, batch_size, learning_rate, epochs):
         # Train 
         total_train_loss = 0
         
-        for trainX, trainY in tqdm.tqdm(train_dataloader):
-            trainY = trainY.to(device)
-            mask = trainX['attention_mask'].to(device)
-            input_ids = trainX['input_ids'].squeeze(1).to(device)
+        for X, Y in tqdm.tqdm(train_dataloader):
+            Y = Y.to(device)
+            mask = X['attention_mask'].to(device)
+            input_ids = X['input_ids'].squeeze(1).to(device)
             
             output = model(input_ids, mask)
             
-            batch_train_loss = criterion(output, trainY.long())
+            batch_train_loss = criterion(output, Y.long())
             total_train_loss += batch_train_loss.item()
             
             model.zero_grad()
@@ -63,14 +64,14 @@ def train(model, train_dataset, val_dataset, batch_size, learning_rate, epochs):
         total_val_loss = 0
         
         with torch.no_grad():
-            for valX, valY in val_dataloader:
-                valY = valY.to(device)
-                mask = valX['attention_mask'].to(device)
-                input_ids = valX['input_ids'].squeeze(1).to(device)
+            for X, Y in val_dataloader:
+                Y = Y.to(device)
+                mask = X['attention_mask'].to(device)
+                input_ids = X['input_ids'].squeeze(1).to(device)
             
                 output = model(input_ids, mask)
             
-                batch_val_loss = criterion(output, valY.long())
+                batch_val_loss = criterion(output, Y.long())
                 total_val_loss += batch_val_loss.item()
         
         # Show progress
@@ -93,7 +94,7 @@ def predict(model, test_dataset):
             Y = Y.to(device)
             mask = X['attention_mask'].to(device)
             input_ids = X['input_ids'].squeeze(1).to(device)
-            output = model2(input_ids, mask)
+            output = model(input_ids, mask)
             predictions.append(output)
     
     predictions = torch.cat(predictions, axis=0)
